@@ -1,32 +1,17 @@
-const Discord = require('discord.js');
-const { Client } = require('discord.js');
-const client = new Client({ ws: { intents:['GUILD_MEMBERS'] } });
+//cleaner with embeds / requires command manager
 
-const prefix = "!"; // your prefix
-const guild = ""; // the guild id will make bot working on it only
-const role = ""; // the staff role's id
-
-
-client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-});
-
-client.on('message', async (message) => {
-  if (message.author.bot || !message.guild || message.guild.id !== guild || !message.content.startsWith(prefix)) return;
-
-  if (message.content.toLowerCase().startsWith(prefix + "staff")) {
-    
-    message.guild.members.fetch();
-
-    var allstaff = message.guild.roles.cache.get(role).members.filter(m => m.presence.status === 'online').map(m => m.user);
-
-    if (Object.keys(allstaff).length > 0) {
-      message.channel.send(`The online staff members are: ${allstaff} (Pinged by: ${message.author.tag})`);
-    } else {
-      return message.channel.send(`There is no staff online at this moment, try again later.`);
+module.exports = {
+    name: 'staff',
+    description: "Displays all online staff",
+    execute(message,args,Discord){
+        const noStaff = new Discord.MessageEmbed().setColor("##ffffed").addFields({name: "No staff!", value: "There are no online staff available at the moment :("})
+        const Staffrole = "848478990317518858"//staff id
+        var onlineStaff = message.guild.roles.cache.get(Staffrole).members.filter(mem => mem.presence.status === 'online').map(mem => mem.user);
+        const StaffList = new Discord.MessageEmbed().setColor("#ffffed").addFields({name: "Online staff", value: "Staff: " + onlineStaff }).setFooter("Pinged by: " + message.author.tag)
+        if(!Object.keys(onlineStaff).length > 0) {return message.channel.send(noStaff) }
+        else{
+            message.channel.send(StaffList)
+        }
+        
     }
-
-  }
-}); // This command pings all the staff members that are online.
-
-client.login(process.getenv);
+}
